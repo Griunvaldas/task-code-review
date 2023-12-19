@@ -2,14 +2,18 @@
 
 namespace App\Dto\Customer;
 
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class NotifyCustomerDto
 {
-    /*
-     *
+    /**
+     * @Assert\NotBlank(message="body cannot be empty", payload="101")
      */
     private string $body;
+
+    /**
+     * @Assert\NotBlank(message="type cannot be empty", payload="101")
+     */
     private string $type;
 
     public function __construct(string $body, string $type)
