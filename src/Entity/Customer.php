@@ -6,10 +6,21 @@ use App\Model\Message;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass=App\EntityRepository\CustomerRepository::class)
  */
 class Customer
 {
+
+    /**
+     *
+     * @ORM\Column(name="`id`", type="integer", length=11, nullable=false)
+     * @ORM\GeneratedValue()
+     * @ORM\Id()
+     *
+     * @var int
+     */
+    public int $id;
+
 
     /**
      *
@@ -26,7 +37,23 @@ class Customer
      *
      * @var string
      */
-    public string $notification_type = Message::TYPE_EMAIL;
+    public string $notificationType = Message::TYPE_EMAIL;
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 
     /**
      * @return string
@@ -49,14 +76,14 @@ class Customer
      */
     public function getNotificationType(): string
     {
-        return $this->notification_type;
+        return $this->notificationType;
     }
 
     /**
-     * @param string $notification_type
+     * @param string $notificationType
      */
-    public function setNotificationType(string $notification_type): void
+    public function setNotificationType(string $notificationType): void
     {
-        $this->notification_type = $notification_type;
+        $this->notificationType = $notificationType;
     }
 }

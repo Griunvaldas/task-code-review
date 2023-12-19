@@ -4,12 +4,8 @@ namespace App\EntityRepository;
 
 use App\Entity\Customer;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
-/**
- * @ORM\Entity
- */
-class CustomerRepository extends ServiceEntityRepository
+class CustomerRepository extends EntityRepository
 {
     /**
      * {@inheritDoc}

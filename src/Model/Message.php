@@ -28,10 +28,13 @@ class Message
 
     /**
      * @param string $body
+     * @return Message
      */
-    public function setBody(string $body): void
+    public function setBody(string $body): self
     {
         $this->body = $body;
+
+        return $this;
     }
 
     /**
@@ -44,10 +47,13 @@ class Message
 
     /**
      * @param string $type
+     * @return Message
      */
-    public function setType(string $type): void
+    public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
     }
 
 }

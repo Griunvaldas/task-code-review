@@ -1,19 +1,22 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Dto\Customer\NotifyCustomerDto;
 use App\Entity\Customer;
-use App\EntityRepository\CustomerRepository;
-use App\Model\Message;
-use App\Service\EmailSender;
 use App\Service\Messenger;
-use App\Service\SMSSender;
-use App\Service\Validator;
-use App\Service\WeatherService;
+use App\Service\Sender\SenderResolver;
+use App\System\Customer\CustomerMessageBuilder;
+use App\System\SerializerBuilder;
+use Doctrine\Persistence\ObjectRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 
 /**
  *
@@ -27,19 +30,44 @@ class CustomerController extends AbstractController
      */
     public function notifyCustomer(string $code, Request $request): Response
     {
-        $requestData = json_decode($request->getContent(), true);
+        try {
+            $requestData = SerializerBuilder::build()->deserialize(
+                $request->getContent(),
+                NotifyCustomerDto::class,
+                'json'
+            );
 
-        $repository = new CustomerRepository();
-        /** @var Customer $customer */
-        $customer = $repository->find($code);
+            $customer = $this->getCustomerRepository()->findOneBy(['code' => $code]);
 
-        $message = new Message();
-        $message->setBody($customer->getNotificationType());
-        $message->setType($requestData->type);
+            if (!$customer instanceof Customer) {
+                throw new NotFoundHttpException(
+                    'Customer not found',
+                    null,
+                    Response::HTTP_NOT_FOUND
+                );
+            }
 
-        $messenger = new Messenger([new EmailSender(), new SMSSender()]);
-        $messenger->send($message);
+            if ($customer->getNotificationType() === $requestData->getType()) {
+                $message = $this->getMessageBuilder()->build($requestData, $customer);
+                $messenger = new Messenger(SenderResolver::resolve($customer->getNotificationType()));
+                $messenger->send($message);
+            }
 
-        return new Response("OK");
+            return new Response('OK');
+        } catch (NotFoundHttpException $e) {
+            return new Response($e->getMessage(), $e->getCode());
+        } catch (MissingConstructorArgumentsException $e) {
+            return new Response('Bad request', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    private function getCustomerRepository(): ObjectRepository
+    {
+        return $this->getDoctrine()->getRepository(Customer::class);
+    }
+
+    private function getMessageBuilder(): CustomerMessageBuilder
+    {
+        return new CustomerMessageBuilder();
     }
 }

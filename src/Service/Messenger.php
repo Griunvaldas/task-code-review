@@ -4,33 +4,34 @@ namespace App\Service;
 
 
 use App\Model\Message;
+use App\Service\Sender\SenderInterface;
 
 class Messenger
 {
     /**
-     * @var SenderInterface[]
+     * @var null|SenderInterface
      */
-    protected $senders = [];
+    protected ?SenderInterface $sender = null;
 
     /**
      * Messenger constructor.
-     * @param SenderInterface[] $senders
+     * @param SenderInterface $sender
      */
-    public function __construct(array $senders = [])
+    public function __construct(SenderInterface $sender)
     {
-        $this->senders = $senders;
+        $this->sender = $sender;
     }
 
     /**
      * {@inheritDoc}
      *
      */
-    public function send(Message $message)
+    public function send(Message $message): void
     {
-        foreach ($this->senders as $sender) {
-            if ($sender->supports($message)) {
-                return $sender->send($message);
-            }
+        if ($this->sender === null || !$this->sender->supports($message)) {
+            return;
         }
+
+        $this->sender->send($message);
     }
 }

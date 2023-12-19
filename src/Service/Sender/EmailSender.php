@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Sender;
 
 use App\Model\Message;
 
@@ -9,7 +9,7 @@ class EmailSender implements SenderInterface
     /**
      * {@inheritDoc}
      */
-    public function supports(Message $message)
+    public function supports(Message $message): bool
     {
         return $message->type == Message::TYPE_EMAIL;
     }
@@ -19,8 +19,8 @@ class EmailSender implements SenderInterface
      *
      * @param Message $message
      */
-    public function send(Message $message)
+    public function send(Message $message): void
     {
-        print "Email";
+        print "Email sent" . PHP_EOL;
     }
 }
