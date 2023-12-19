@@ -34,4 +34,9 @@ class Messenger
 
         $this->sender->send($message);
     }
+
+    public function isSent(): bool
+    {
+        return $this->sender->isSent();
+    }
 }

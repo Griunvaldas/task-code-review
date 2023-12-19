@@ -6,6 +6,8 @@ use App\Model\Message;
 
 class SMSSender implements SenderInterface
 {
+    public bool $isSent = false;
+
     /**
      * {@inheritDoc}
      */
@@ -19,8 +21,16 @@ class SMSSender implements SenderInterface
      *
      * @param Message $message
      */
-    public function send(Message $message)
+    public function send(Message $message): void
     {
-        print "SMS sent" . PHP_EOL;
+        $this->isSent = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isSent(): bool
+    {
+        return $this->isSent;
     }
 }

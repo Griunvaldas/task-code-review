@@ -11,11 +11,11 @@ use App\Service\Sender\SenderResolver;
 use App\System\Customer\CustomerMessageBuilder;
 use App\System\SerializerBuilder;
 use Doctrine\Persistence\ObjectRepository;
+use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
@@ -40,39 +40,54 @@ class CustomerController extends AbstractController
     public function notifyCustomer(string $code, Request $request): JsonResponse
     {
         try {
-            $requestData = SerializerBuilder::build()->deserialize(
-                $request->getContent(),
-                NotifyCustomerDto::class,
-                'json'
-            );
-
-            $validationResult = $this->validate($requestData);
-
-            if (!empty($validationResult)) {
-                return new JsonResponse(['errors' => $validationResult], Response::HTTP_BAD_REQUEST);
-            }
-
             $customer = $this->getCustomerRepository()->findOneBy(['code' => $code]);
 
             if (!$customer instanceof Customer) {
-                throw new NotFoundHttpException(
-                    'Customer not found',
-                    null,
+                return new JsonResponse(
+                    ['success' => 0, 'customer' => 'not found'],
                     Response::HTTP_NOT_FOUND
                 );
             }
+
+            if (!empty($request->getContent())) {
+                $requestData = SerializerBuilder::build()->deserialize(
+                    $request->getContent(),
+                    NotifyCustomerDto::class,
+                    'json'
+                );
+
+                $validationResult = $this->validate($requestData);
+
+                if (!empty($validationResult)) {
+                    return new JsonResponse(
+                        ['success' => 0, 'errors' => $validationResult],
+                        Response::HTTP_UNPROCESSABLE_ENTITY
+                    );
+                }
+            } else {
+                return new JsonResponse(['success' => 0], Response::HTTP_BAD_REQUEST);
+            }
+
+            $success = 0;
 
             if ($customer->getNotificationType() === $requestData->getType()) {
                 $message = $this->getMessageBuilder()->build($requestData, $customer);
                 $messenger = new Messenger(SenderResolver::resolve($customer->getNotificationType()));
                 $messenger->send($message);
+                $success = (int)$messenger->isSent();
             }
 
-            return new JsonResponse('OK');
-        } catch (NotFoundHttpException $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode());
-        } catch (MissingConstructorArgumentsException $e) {
-            return new JsonResponse('Bad request', Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                [
+                    'success' => $success,
+                    'message' => [
+                        'type' => $requestData->getType(),
+                        'body' => $requestData->getBody(),
+                    ]
+                ]
+            );
+        } catch (MissingConstructorArgumentsException|\InvalidArgumentException $e) {
+            return new JsonResponse(['success' => 0], Response::HTTP_BAD_REQUEST);
         }
     }
 

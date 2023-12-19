@@ -6,6 +6,8 @@ use App\Model\Message;
 
 class EmailSender implements SenderInterface
 {
+    public bool $isSent = false;
+
     /**
      * {@inheritDoc}
      */
@@ -21,6 +23,14 @@ class EmailSender implements SenderInterface
      */
     public function send(Message $message): void
     {
-        print "Email sent" . PHP_EOL;
+        $this->isSent = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isSent(): bool
+    {
+        return $this->isSent;
     }
 }
