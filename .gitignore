@@ -8,3 +8,8 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+/.docker-user.env
+/docker/mariadb/conf/*
+/docker/mariadb/data/*
+/docker/mariadb/logs/*

@@ -1,0 +1,11 @@
+; OVERRIDES FOR DEVELOPMENT IMAGE
+
+[PHP]
+session.cookie_lifetime=0
+
+[Xdebug]
+xdebug.mode=${PHP_XDEBUG_MODE}
+xdebug.client_host=webserver.local
+
+xdebug.start_with_request=${PHP_XDEBUG_START_WITH_REQUEST}
+xdebug.log_level=0
