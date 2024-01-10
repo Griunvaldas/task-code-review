@@ -23,6 +23,25 @@ class SenderResolverTest extends TestCase
         );
     }
 
+    /**
+     * @dataProvider invalidTypeDataProvider
+     * @param string $invalidType
+     * @return void
+     */
+    public function testInvalidType(string $invalidType): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        SenderResolver::resolve($invalidType);
+    }
+
+    public function invalidTypeDataProvider(): \Generator
+    {
+        yield '#1 - invalid type' => ['invalid_type'];
+
+        yield '#2 - empty type' => [''];
+    }
+
+
     public function resolveDataProvider(): \Generator
     {
         yield '#1 - email type, message sent as email' => [
