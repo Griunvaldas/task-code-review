@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 
@@ -22,10 +24,6 @@ class Messenger
         $this->sender = $sender;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     */
     public function send(Message $message): void
     {
         if ($this->sender === null || !$this->sender->supports($message)) {
