@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Model\Message;
@@ -24,7 +26,7 @@ class Customer
 
     /**
      *
-     * @ORM\Column(name="`customer_code`", type="string", length=32, nullable=false)
+     * @ORM\Column(name="`customer_code`", type="string", length=32, nullable=false, unique=true)
      *
      * @var string
      */
